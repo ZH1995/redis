@@ -33,6 +33,9 @@
 #ifndef __SDS_H
 #define __SDS_H
 
+/**
+ * 最大预分配长度
+ */
 #define SDS_MAX_PREALLOC (1024*1024)
 const char *SDS_NOINIT;
 
@@ -40,18 +43,39 @@ const char *SDS_NOINIT;
 #include <stdarg.h>
 #include <stdint.h>
 
+/**
+ * char*类型的别名sds
+ */
 typedef char *sds;
+
+/**
+ * 3.2分支之前的sdshdr结构
+ * struct sdshdr {
+ *    unsigned int len; // buf数组中已使用字节的数量
+ *    unsigned int free; // buf数组中未使用字节的数量
+ *    char buf[]; // 保存字符串的字节数组
+ * }
+ *
+ * 3.2分支引入了五种sdshdr类型，每次创建时根据sds的实际长度判断选择什么类型的sdshdr，不同类型的sdshdr占用的空间不同。
+ */
 
 /* Note: sdshdr5 is never used, we just access the flags byte directly.
  * However is here to document the layout of type 5 SDS strings. */
+/**
+ * sdshdr5永远不会被使用（直接访问标志字节？）
+ */
 struct __attribute__ ((__packed__)) sdshdr5 {
-    unsigned char flags; /* 3 lsb of type, and 5 msb of string length */
-    char buf[];
+    unsigned char flags; /* 3 lsb of type, and 5 msb of string length */ /* 低3位存真实的flags（类型），高5位存len（长度） */
+    char buf[]; /* 字符串字节数组 */
 };
+
+/**
+ * __attribute__ ((__packed__))语法是GCC的一个扩展，不存在于任何C语言标准，用来告诉编译器使用最小的内存来存储sdshdr.
+ */
 struct __attribute__ ((__packed__)) sdshdr8 {
-    uint8_t len; /* used */
-    uint8_t alloc; /* excluding the header and null terminator */
-    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    uint8_t len; /* used */ /* 字符串长度 */
+    uint8_t alloc; /* excluding the header and null terminator */ /* 已分配的内存大小（单位是字节） */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */ /* 用一个字节表示当前sdshdr的类型，因为sdshdr有5种类型，所以至少需要3位来表示。000:sdshdr5, 001:sdshdr8, 010:sdshdr16, 011:sdshdr32, 100:sdshdr64。高5位用不到都为0 */
     char buf[];
 };
 struct __attribute__ ((__packed__)) sdshdr16 {
