@@ -97,19 +97,21 @@ struct __attribute__ ((__packed__)) sdshdr64 {
     char buf[];
 };
 
-#define SDS_TYPE_5  0
-#define SDS_TYPE_8  1
-#define SDS_TYPE_16 2
-#define SDS_TYPE_32 3
-#define SDS_TYPE_64 4
-#define SDS_TYPE_MASK 7
+#define SDS_TYPE_5  0 // 00000000
+#define SDS_TYPE_8  1 // 00000001
+#define SDS_TYPE_16 2 // 00000010
+#define SDS_TYPE_32 3 // 00000011
+#define SDS_TYPE_64 4 // 00000100
+#define SDS_TYPE_MASK 7 // 00000111 作为取flag低三位的掩码,主要由于sdshdr5的高5位不一定为0，所以需要有SDS_TYPE_MASK
 #define SDS_TYPE_BITS 3
 #define SDS_HDR_VAR(T,s) struct sdshdr##T *sh = (void*)((s)-(sizeof(struct sdshdr##T)));
-#define SDS_HDR(T,s) ((struct sdshdr##T *)((s)-(sizeof(struct sdshdr##T))))
-#define SDS_TYPE_5_LEN(f) ((f)>>SDS_TYPE_BITS)
+#define SDS_HDR(T,s) ((struct sdshdr##T *)((s)-(sizeof(struct sdshdr##T))))  // 返回一个类型为T包含s字符串的sdshdr的指针。##的含义是在一个宏定义里连接两个子串，##两边的子串会被编译器识别为一个。
+#define SDS_TYPE_5_LEN(f) ((f)>>SDS_TYPE_BITS) // 用sdshdr5的flag变量做参数返回sds的长度,右移3位，剩下的高5位就是sds长度
 
 static inline size_t sdslen(const sds s) {
+    // s[-1]等同于*(s-1)，sdshdr内部禁用了内存对齐，所以此处取出的是flag？
     unsigned char flags = s[-1];
+    // 根据flags和SDS_TYPE_MASK来判断sdshdr的类型，再按照指定类型获取长度
     switch(flags&SDS_TYPE_MASK) {
         case SDS_TYPE_5:
             return SDS_TYPE_5_LEN(flags);
