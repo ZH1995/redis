@@ -88,7 +88,7 @@ typedef struct list {
 list *listCreate(void);
 // 释放给定链表，以及链表中的所有节点，T=O(N)
 void listRelease(list *list);
-// TODO:
+// 释放给定链表所有节点，但并不释放链表自身，T=O(N)
 void listEmpty(list *list);
 // 将一个包含给定值的新节点添加到给定链表的表头，T=O(1)
 list *listAddNodeHead(list *list, void *value);
@@ -98,11 +98,11 @@ list *listAddNodeTail(list *list, void *value);
 list *listInsertNode(list *list, listNode *old_node, void *value, int after);
 // 从链表中删除给定节点，T=O(N)
 void listDelNode(list *list, listNode *node);
-// TODO:
+// 获取给定链表的链表迭代器，T=O(1)
 listIter *listGetIterator(list *list, int direction);
-// TODO:
+// 获取链表迭代器的下一个元素，T=O(1)
 listNode *listNext(listIter *iter);
-// TODO:
+// 释放链表迭代器内存，T=O(1)
 void listReleaseIterator(listIter *iter);
 // 复制一个给定链接的副本，T=O(N)
 list *listDup(list *orig);
@@ -110,13 +110,13 @@ list *listDup(list *orig);
 listNode *listSearchKey(list *list, void *key);
 // 返回链表在给定索引上的节点，T=O(N)
 listNode *listIndex(list *list, long index);
-// TODO:
+// 用给定链表的表头节点重置链表迭代器，T=O(1)
 void listRewind(list *list, listIter *li);
-// TODO:
+// 用给定链表的表尾节点重置链表迭代器，T=O(1)
 void listRewindTail(list *list, listIter *li);
-// TODO:
+// 给定链表每个节点向右旋转1位，T=O(1)
 void listRotate(list *list);
-// TODO:
+// 把链表o的所有节点连接到链表l上，同时把链表o置空，T=O(1)
 void listJoin(list *l, list *o);
 
 /* Directions for iterators */
